@@ -196,6 +196,8 @@
       PyObject *type, *value, *traceback;
       PyErr_Fetch(&type, &value, &traceback);
       frame->f_lineno = lineno;
+      if (frame->f_code)
+          frame->f_code->co_firstlineno = lineno;
       tstate->tracing++;
       tstate->use_tracing = 0;
       ret = tstate->c_tracefunc(tstate->c_traceobj, frame, PyTrace_LINE, NULL);
@@ -249,6 +251,44 @@
   #define __Pyx_TraceLine(lineno, nogil, goto_error)   if (1); else goto_error;
 #endif
 
+
+#if CYTHON_VISIBLE_FRAME
+  // see call_trace_protected() in CPython's ceval.c
+  static int __Pyx_call_line_frame_func(PyThreadState *tstate, PyFrameObject *frame, int lineno) {
+      frame->f_lineno = lineno;
+      if (frame->f_code)
+          frame->f_code->co_firstlineno = lineno;
+      return 0;
+  }
+
+  #ifdef WITH_THREAD
+  #define __Pyx_FrameLine(lineno, nogil, goto_error)                                       \
+      if (nogil) {                                                                         \
+          if (CYTHON_TRACE_NOGIL) {                                                        \
+              int ret = 0;                                                                 \
+              PyThreadState *tstate;                                                       \
+              PyGILState_STATE state = PyGILState_Ensure();                                \
+              tstate = PyThreadState_GET();                                                \
+              ret = __Pyx_call_line_frame_func(tstate, $frame_cname, lineno);              \
+              PyGILState_Release(state);                                                   \
+              if (unlikely(ret)) goto_error;                                               \
+          }                                                                                \
+      } else {                                                                             \
+          PyThreadState* tstate = PyThreadState_GET();                                     \
+          int ret = __Pyx_call_line_frame_func(tstate, $frame_cname, lineno);              \
+          if (unlikely(ret)) goto_error;                                                   \
+      }
+  #else
+  #define __Pyx_FrameLine(lineno, nogil, goto_error)                                       \
+  PyThreadState* tstate = PyThreadState_GET();                                         \
+  int ret = __Pyx_call_line_frame_func(tstate, $frame_cname, lineno);              \
+  if (unlikely(ret)) goto_error;
+  #endif
+#else
+  // mark error label as used to avoid compiler warnings
+  #define __Pyx_FrameLine(lineno, nogil, goto_error)   if (1); else goto_error;
+#endif
+
 /////////////// Profile ///////////////
 //@substitute: naming
 
@@ -281,6 +321,11 @@ static int __Pyx_TraceSetupAndCall(PyCodeObject** code,
         }
         if (CYTHON_VISIBLE_FRAME) {
             (*frame)->f_back = tstate->frame;
+            if ((*frame)->f_trace == NULL) {
+                // this enables "f_lineno" lookup, at least in CPython ...
+                Py_INCREF(Py_None);
+                (*frame)->f_trace = Py_None;
+            }
         }
 #if PY_VERSION_HEX < 0x030400B1
     } else {

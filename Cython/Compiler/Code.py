@@ -1695,6 +1695,10 @@ class CCodeWriter(object):
             self.indent()
             self.write('__Pyx_TraceLine(%d,%d,%s)\n' % (
                 pos[1], not self.funcstate.gil_owned, self.error_goto(pos)))
+        elif trace and self.funcstate and self.funcstate.can_trace and self.globalstate.directives['visible_frames']:
+            self.indent()
+            self.write('__Pyx_FrameLine(%d,%d,%s)\n' % (
+                pos[1], not self.funcstate.gil_owned, self.error_goto(pos)))
 
     def _build_marker(self, pos):
         source_desc, line, col = pos
