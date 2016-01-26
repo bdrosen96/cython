@@ -2077,11 +2077,12 @@ class ModuleNode(Nodes.Node, Nodes.BlockNode):
 
         profile = code.globalstate.directives['profile']
         linetrace = code.globalstate.directives['linetrace']
-        if profile or linetrace:
+        visible_frames = code.globalstate.directives['visible_frames']
+        if profile or linetrace or visible_frames:
             code.globalstate.use_utility_code(UtilityCode.load_cached("Profile", "Profile.c"))
 
         code.put_declare_refcount_context()
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             tempdecl_code.put_trace_declarations()
             code.put_trace_frame_init()
 
@@ -2179,13 +2180,13 @@ class ModuleNode(Nodes.Node, Nodes.BlockNode):
         code.put_error_if_neg(self.pos, "__Pyx_patch_abc()")
         code.putln("#endif")
 
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             code.put_trace_call(header3, self.pos, nogil=not code.funcstate.gil_owned)
             code.funcstate.can_trace = True
 
         self.body.generate_execution_code(code)
 
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             code.funcstate.can_trace = False
             code.put_trace_return("Py_None", nogil=not code.funcstate.gil_owned)
 

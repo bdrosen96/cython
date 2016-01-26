@@ -117,6 +117,7 @@ directive_defaults = {
     'profile': False,
     'no_gc_clear': False,
     'linetrace': False,
+    'visible_frames': False,
     'emit_code_comments': True,  # copy original source code into C code comments
     'annotation_typing': False,  # read type declarations from Python function annotations
     'infer_types': None,

@@ -1722,7 +1722,8 @@ class FuncDefNode(StatNode, BlockNode):
 
         profile = code.globalstate.directives['profile']
         linetrace = code.globalstate.directives['linetrace']
-        if profile or linetrace:
+        visible_frames = code.globalstate.directives['visible_frames']
+        if profile or linetrace or visible_frames:
             code.globalstate.use_utility_code(
                 UtilityCode.load_cached("Profile", "Profile.c"))
 
@@ -1819,7 +1820,7 @@ class FuncDefNode(StatNode, BlockNode):
         elif lenv.nogil and lenv.has_with_gil_block:
             code.declare_gilstate()
 
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             tempvardecl_code.put_trace_declarations()
             code_object = self.code_object.calculate_result_code(code) if self.code_object else None
             code.put_trace_frame_init(code_object)
@@ -1887,7 +1888,7 @@ class FuncDefNode(StatNode, BlockNode):
                 code.put_incref(outer_scope_cname, cenv.scope_class.type)
                 code.put_giveref(outer_scope_cname)
         # ----- Trace function call
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             # this looks a bit late, but if we don't get here due to a
             # fatal error before hand, it's not really worth tracing
             code.put_trace_call(self.entry.name, self.pos, nogil=not code.funcstate.gil_owned)
@@ -2090,7 +2091,7 @@ class FuncDefNode(StatNode, BlockNode):
             code.putln("if (unlikely(%s == -1) && !PyErr_Occurred()) %s = -2;" % (
                     Naming.retval_cname, Naming.retval_cname))
 
-        if profile or linetrace:
+        if profile or linetrace or visible_frames:
             code.funcstate.can_trace = False
             if self.return_type.is_pyobject:
                 code.put_trace_return(Naming.retval_cname, nogil=not code.funcstate.gil_owned)

@@ -110,7 +110,7 @@ cclass = ccall = cfunc = _EmptyDecoratorAndManager()
 returns = wraparound = boundscheck = initializedcheck = nonecheck = \
     overflowcheck = embedsignature = cdivision = cdivision_warnings = \
     always_allows_keywords = profile = linetrace = infer_type = \
-    type_version_tag = unraisable_tracebacks = freelist = \
+    type_version_tag = unraisable_tracebacks = freelist = visible_frames \
     lambda arg: _EmptyDecoratorAndManager()
 
 optimization = _Optimization()
