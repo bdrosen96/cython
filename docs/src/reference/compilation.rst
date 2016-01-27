@@ -371,7 +371,7 @@ Cython code.  Here is the list of currently supported directives:
     Write logic to produce visible frames, including accurate line numbers
     into the compiled C code. Default is False.  Note that the generated
     module will not actually use frames logic, unless you additionally pass
-    the C macro definition ``CYTHON_VISIBLE_FRAME=1`` to the C compiler (e.g.
+    the C macro definition ``CYTHON_VISIBLE_FRAMES=1`` to the C compiler (e.g.
     using the distutils option ``define_macros``).  Define ``CYTHON_TRACE_NOGIL=1``
     to also include ``nogil`` functions and sections.
 

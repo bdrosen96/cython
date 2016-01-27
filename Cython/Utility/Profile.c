@@ -28,11 +28,11 @@
   #undef CYTHON_PROFILE_REUSE_FRAME
 #endif
 
-#ifndef CYTHON_VISIBLE_FRAME
-    #define CYTHON_VISIBLE_FRAME 0
+#ifndef CYTHON_VISIBLE_FRAMES
+    #define CYTHON_VISIBLE_FRAMES 0
 #endif
 
-#if CYTHON_VISIBLE_FRAME
+#if CYTHON_VISIBLE_FRAMES
     #ifdef CYTHON_PROFILE_REUSE_FRAME
         #undef CYTHON_PROFILE_REUSE_FRAME
     #endif
@@ -43,13 +43,13 @@
   #define CYTHON_PROFILE_REUSE_FRAME 0
 #endif
 
-#if CYTHON_PROFILE || CYTHON_TRACE || CYTHON_VISIBLE_FRAME
+#if CYTHON_PROFILE || CYTHON_TRACE || CYTHON_VISIBLE_FRAMES
 
   #include "compile.h"
   #include "frameobject.h"
   #include "traceback.h"
 
-  #if CYTHON_VISIBLE_FRAME
+  #if CYTHON_VISIBLE_FRAMES
     #define CYTHON_FRAME_UNDO(frame)
   #else
     #define CYTHON_FRAME_UNDO(frame) tstate->frame = tstate->frame->f_back;
@@ -80,7 +80,7 @@
           tstate = PyThreadState_GET();                                                  \
           if ((unlikely(tstate->use_tracing) && !tstate->tracing &&                      \
                   (tstate->c_profilefunc || (CYTHON_TRACE && tstate->c_tracefunc))) ||   \
-                   CYTHON_VISIBLE_FRAME) {                                               \
+                   CYTHON_VISIBLE_FRAMES) {                                               \
               __Pyx_use_tracing = __Pyx_TraceSetupAndCall(&$frame_code_cname, &$frame_cname, funcname, srcfile, firstlineno);  \
           }                                                                              \
           PyGILState_Release(state);                                                     \
@@ -90,7 +90,7 @@
       PyThreadState* tstate = PyThreadState_GET();                                       \
       if ((unlikely(tstate->use_tracing) && !tstate->tracing &&                          \
               (tstate->c_profilefunc || (CYTHON_TRACE && tstate->c_tracefunc))) ||       \
-              CYTHON_VISIBLE_FRAME) {                                                    \
+              CYTHON_VISIBLE_FRAMES) {                                                    \
           __Pyx_use_tracing = __Pyx_TraceSetupAndCall(&$frame_code_cname, &$frame_cname, funcname, srcfile, firstlineno);  \
           if (unlikely(__Pyx_use_tracing < 0)) goto_error;                               \
       }                                                                                  \
@@ -100,7 +100,7 @@
   {   PyThreadState* tstate = PyThreadState_GET();                                       \
       if ((unlikely(tstate->use_tracing) && !tstate->tracing &&                          \
               (tstate->c_profilefunc || (CYTHON_TRACE && tstate->c_tracefunc))) ||       \
-               CYTHON_VISIBLE_FRAME) {                                                   \
+               CYTHON_VISIBLE_FRAMES) {                                                   \
           __Pyx_use_tracing = __Pyx_TraceSetupAndCall(&$frame_code_cname, &$frame_cname, funcname, srcfile, firstlineno);  \
           if (unlikely(__Pyx_use_tracing < 0)) goto_error;                               \
       }                                                                                  \
@@ -252,7 +252,7 @@
 #endif
 
 
-#if CYTHON_VISIBLE_FRAME
+#if CYTHON_VISIBLE_FRAMES
   // see call_trace_protected() in CPython's ceval.c
   static int __Pyx_call_line_frame_func(PyThreadState *tstate, PyFrameObject *frame, int lineno) {
       frame->f_lineno = lineno;
@@ -292,7 +292,7 @@
 /////////////// Profile ///////////////
 //@substitute: naming
 
-#if CYTHON_PROFILE || CYTHON_VISIBLE_FRAME
+#if CYTHON_PROFILE || CYTHON_VISIBLE_FRAMES
 
 static int __Pyx_TraceSetupAndCall(PyCodeObject** code,
                                    PyFrameObject** frame,
@@ -319,7 +319,7 @@ static int __Pyx_TraceSetupAndCall(PyCodeObject** code,
             Py_INCREF(Py_None);
             (*frame)->f_trace = Py_None;
         }
-        if (CYTHON_VISIBLE_FRAME) {
+        if (CYTHON_VISIBLE_FRAMES) {
             (*frame)->f_back = tstate->frame;
             if ((*frame)->f_trace == NULL) {
                 // this enables "f_lineno" lookup, at least in CPython ...
@@ -346,7 +346,7 @@ static int __Pyx_TraceSetupAndCall(PyCodeObject** code,
     tstate->use_tracing = (tstate->c_profilefunc ||
                            (CYTHON_TRACE && tstate->c_tracefunc));
     tstate->tracing--;
-    if (CYTHON_VISIBLE_FRAME) {
+    if (CYTHON_VISIBLE_FRAMES) {
         tstate->frame = *frame;
     }
     if (retval) {
