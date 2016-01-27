@@ -36,7 +36,7 @@
     #ifdef CYTHON_PROFILE_REUSE_FRAME
         #undef CYTHON_PROFILE_REUSE_FRAME
     #endif
-    #define CYTHON_PROFILE_REUSE_FRAME
+    #define CYTHON_PROFILE_REUSE_FRAME 0
 #endif
 
 #ifndef CYTHON_PROFILE_REUSE_FRAME
@@ -50,9 +50,9 @@
   #include "traceback.h"
 
   #if CYTHON_VISIBLE_FRAMES
-    #define CYTHON_FRAME_UNDO(frame)
+    #define CYTHON_FRAME_UNDO() tstate->frame = tstate->frame->f_back;
   #else
-    #define CYTHON_FRAME_UNDO(frame) tstate->frame = tstate->frame->f_back;
+    #define CYTHON_FRAME_UNDO()
   #endif
 
   #if CYTHON_PROFILE_REUSE_FRAME
@@ -138,7 +138,7 @@
           tstate->c_tracefunc(tstate->c_traceobj, frame, PyTrace_RETURN, result);
       if (tstate->c_profilefunc)
           tstate->c_profilefunc(tstate->c_profileobj, frame, PyTrace_RETURN, result);
-      CYTHON_FRAME_UNDO(frame);
+      CYTHON_FRAME_UNDO();
       CYTHON_FRAME_DEL(frame);
       tstate->use_tracing = 1;
       tstate->tracing--;
@@ -344,7 +344,7 @@ static int __Pyx_TraceSetupAndCall(PyCodeObject** code,
     if (retval && tstate->c_profilefunc)
         retval = tstate->c_profilefunc(tstate->c_profileobj, *frame, PyTrace_CALL, NULL) == 0;
     tstate->use_tracing = (tstate->c_profilefunc ||
-                           (CYTHON_TRACE && tstate->c_tracefunc));
+                           (CYTHON_TRACE && tstate->c_tracefunc) || CYTHON_VISIBLE_FRAMES);
     tstate->tracing--;
     if (CYTHON_VISIBLE_FRAMES) {
         tstate->frame = *frame;
