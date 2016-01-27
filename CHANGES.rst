@@ -8,6 +8,9 @@ Latest development
 Features added
 --------------
 
+* EXPERIMENTAL support for simple Cython code level visible frames.  Enabled by
+  the "visible_frames" compiler directive
+
 * Parser was adapted to some minor syntax changes in Py3.6, e.g.
   https://bugs.python.org/issue9232
 

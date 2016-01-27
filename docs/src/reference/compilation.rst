@@ -367,6 +367,14 @@ Cython code.  Here is the list of currently supported directives:
     ``define_macros``).  Define ``CYTHON_TRACE_NOGIL=1`` to also include
     ``nogil`` functions and sections.
 
+``visibile_frames`` (True / False)
+    Write logic to produce visible frames, including accurate line numbers
+    into the compiled C code. Default is False.  Note that the generated
+    module will not actually use frames logic, unless you additionally pass
+    the C macro definition ``CYTHON_VISIBLE_FRAME=1`` to the C compiler (e.g.
+    using the distutils option ``define_macros``).  Define ``CYTHON_TRACE_NOGIL=1``
+    to also include ``nogil`` functions and sections.
+
 ``infer_types`` (True / False)
     Infer types of untyped variables in function bodies. Default is
     None, indicating that only safe (semantically-unchanging) inferences
